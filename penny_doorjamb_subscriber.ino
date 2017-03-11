@@ -6,6 +6,7 @@
 const char* ssid     = "lolpackets-2.4G";
 const char* password = "BryceRules";
 const char* mqtt_server = "spark4.thedevranch.net";
+const char* doorjamb_topic = "doorjamb";
 
 int sensorThresholdForFlashing = 400;
 int delayBetweenFlashes = 100;
@@ -41,7 +42,7 @@ void loop() {
     reconnect();
   } 
   client.loop();
-  delay(1000); // wait 1s before publishing another value
+  //delay(1000); // wait 1s before publishing another value
 }
 
 void reconnect() {
@@ -49,8 +50,8 @@ void reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
-    if (client.connect("ESP8266Client")) {
-      client.subscribe("test");
+    if (client.connect("doorjambSUB")) {
+      client.subscribe(doorjamb_topic);
       Serial.println("connected");
     } else {
       Serial.print("failed, rc=");
@@ -80,13 +81,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println(jsonSensorValue);
   
   // Switch on the LED if an 1 was received as first character
-  if (jsonSensorValue < sensorThresholdForFlashing) {  
+  if (jsonSensorValue > sensorThresholdForFlashing) {  
    flashLED();
   }
 }
 
 void flashLED() {
-  int flashTimes = 25;
+  int flashTimes = 5;
   while(flashTimes > 0) {
     Serial.print(" ");
     Serial.print(flashTimes);
