@@ -50,7 +50,7 @@ void reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
-    if (client.connect("doorjambSUB")) {
+    if (client.connect("doorjambSUB02")) {
       client.subscribe(doorjamb_topic);
       Serial.println("connected");
     } else {
