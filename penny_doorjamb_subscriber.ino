@@ -1,3 +1,7 @@
+/*
+ * Code for light that blinks when door is opened as notification
+ */
+
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
@@ -5,11 +9,11 @@
 
 const char* ssid     = "lolpackets-2.4G";
 const char* password = "BryceRules";
-const char* mqtt_server = "spark4.thedevranch.net";
+const char* mqtt_server = "mqtt01.thedevranch.net";
 const char* doorjamb_topic = "doorjamb";
 
-int sensorThresholdForFlashing = 400;
-int delayBetweenFlashes = 100;
+#define SENSOR_THRESHOLD_FOR_FLASHING 100
+#define DELAY_BETWEEN_FLASHES 100
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -76,12 +80,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
     return;
   }
 
-  int jsonSensorValue = jsonRoot["sensorValue"];
-  Serial.print("jsonSensorValue: ");
-  Serial.println(jsonSensorValue);
+  int lightValue = jsonRoot["lightValue"];
+  Serial.print("light: ");
+  Serial.println(lightValue);
+
+  String doorValue = jsonRoot["doorValue"];
+  String openValue = "open";
+  Serial.print("door: ");
+  Serial.println(doorValue);
   
   // Switch on the LED if an 1 was received as first character
-  if (jsonSensorValue > sensorThresholdForFlashing) {  
+  if (doorValue.equals(openValue) && lightValue < SENSOR_THRESHOLD_FOR_FLASHING) {
    flashLED();
   }
 }
@@ -92,9 +101,9 @@ void flashLED() {
     Serial.print(" ");
     Serial.print(flashTimes);
     digitalWrite(BUILTIN_LED, LOW);
-    delay(delayBetweenFlashes);
+    delay(DELAY_BETWEEN_FLASHES);
     digitalWrite(BUILTIN_LED, HIGH);
-    delay(delayBetweenFlashes);
+    delay(DELAY_BETWEEN_FLASHES);
     flashTimes--;
   }
   Serial.println();
